@@ -1,72 +1,46 @@
 package com.github.dts.server;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.util.MethodInvoker;
 
 import com.github.dts.core.ScheduledTaskDefinition;
-import com.github.dts.server.listener.Listenable;
 import com.github.dts.server.listener.TaskSchedulerServerListener;
-import com.google.common.collect.Maps;
 
 /**
- * 分布式任务调度器服务. 由监听器监听是否为主节点, 只有主节点才能执行定时任务
+ * 分布式任务调度服务，提供对定时任务的动态添加、修改、删除等功能
  * 
  * @author wh
- * @lastModified 2016-6-15 10:38:02
+ * @since 0.0.1
  */
-public class DistributedTaskSchedulerServer implements TaskSchedulerServer, Listenable, ApplicationContextAware {
+public class DistributedTaskSchedulerServer extends AbstractDistributedTaskSchedulerServer {
 	
-	private static final Logger logger = LoggerFactory.getLogger(DistributedTaskSchedulerServer.class);
-	
-	private Map<String, ScheduledFuture<?>> runningTasks = Maps.newConcurrentMap(); // 运行中的任务
-	
-	private ApplicationContext applicationContext;
-	
-	private TaskScheduler taskScheduler;
-	
-	private TaskSchedulerServerListener taskSchedulerServerListener;
+	private ScheduledTaskHolder scheduledTaskHolder;
 	
 	public DistributedTaskSchedulerServer(TaskSchedulerServerListener taskSchedulerServerListener) {
-		this.taskSchedulerServerListener = taskSchedulerServerListener;
+		super(taskSchedulerServerListener);
+		setScheduledTaskHolder(new RunningScheduledTaskHolder());
 	}
 	
-	public void setTaskScheduler(TaskScheduler taskScheduler) {
-		this.taskScheduler = taskScheduler;
-	}
-	
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		this.applicationContext = applicationContext;
-	}
-
-	@Override
-	public boolean isLeader() {
-		return taskSchedulerServerListener.isLeader();
+	public void setScheduledTaskHolder(ScheduledTaskHolder scheduledTaskHolder) {
+		this.scheduledTaskHolder = scheduledTaskHolder;
 	}
 
 	@Override
 	public void add(ScheduledTaskDefinition task) {
 		if (task.isRunning()) {
-			ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(createTask(task), new CronTrigger(task.getCronExpression()));
-			runningTasks.put(task.getId(), scheduledFuture);
+			ScheduledFuture<?> scheduledFuture = getTaskScheduler().schedule(createTask(task), 
+					new CronTrigger(task.getCronExpression()));
+			scheduledTaskHolder.add(task.getId(), scheduledFuture);
 		}
 	}
 	
 	protected Runnable createTask(final ScheduledTaskDefinition task) {
-		final MethodInvoker methodInvoker = new MethodInvoker();
-		final Object bean = getBean(task.getBeanName());
-		final String method = task.getMethodName();
+		MethodInvoker methodInvoker = new MethodInvoker();
+		Object bean = getBean(task.getBeanName());
+		String method = task.getMethodName();
 		logger.info("创建定时任务 - {}.{}()", bean.getClass().getName(), method);
 		
 		try {
@@ -79,31 +53,41 @@ public class DistributedTaskSchedulerServer implements TaskSchedulerServer, List
 			logger.error("创建定时任务 - {}.{}() 时, 发生异常 - {}", bean.getClass().getName(), method, e.getMessage());
 		}
 		
-		return new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					if (isLeader()) {
-						logger.debug("定时任务 {}.{}() 将在主节点 - {} 上执行", bean.getClass().getName(), method, 
-								taskSchedulerServerListener.getName());
-						methodInvoker.invoke();
-					} else {
-						logger.debug("定时任务 {}.{}() 不会在从节点 - {} 上执行", bean.getClass().getName(), method, 
-								taskSchedulerServerListener.getName());
-					}
-				} catch (InvocationTargetException e) {
-					logger.error("运行定时任务 - {}.{}() 时, 发生异常 - {}", bean.getClass().getName(), method, e.getMessage());
-				} catch (IllegalAccessException e) {
-					logger.error("运行定时任务 - {}.{}() 时, 发生异常 - {}", bean.getClass().getName(), method, e.getMessage());
-				}
-			} 	
-			
-		};
+		return new RunnableTask(methodInvoker, bean, method);
 	}
 	
-	private Object getBean(String beanName) {
-		return applicationContext.getBean(beanName);
+	private class RunnableTask implements Runnable {
+		
+		private MethodInvoker methodInvoker;
+		private Object bean;
+		private String method;
+		
+		RunnableTask(MethodInvoker methodInvoker, Object bean, String method) {
+			this.methodInvoker = methodInvoker;
+			this.bean = bean;
+			this.method = method;
+		}
+		
+		@Override
+		public void run() {
+			try {
+				if (isLeader()) { // 只有主节点才执行
+					if (logger.isDebugEnabled()) {
+						logger.debug("定时任务 {}.{}() 将在主节点 - {} 上执行", bean.getClass().getName(), method, getName());
+					}
+					methodInvoker.invoke();
+				} else {
+					if (logger.isDebugEnabled()) {
+						logger.debug("定时任务 {}.{}() 不会在从节点 - {} 上执行", bean.getClass().getName(), method, getName());
+					}
+				}
+			} catch (InvocationTargetException e) {
+				logger.error("运行定时任务 - {}.{}() 时, 发生异常 - {}", bean.getClass().getName(), method, e.getMessage());
+			} catch (IllegalAccessException e) {
+				logger.error("运行定时任务 - {}.{}() 时, 发生异常 - {}", bean.getClass().getName(), method, e.getMessage());
+			}
+		}
+		
 	}
 	
 	@Override
@@ -114,13 +98,13 @@ public class DistributedTaskSchedulerServer implements TaskSchedulerServer, List
 
 	@Override
 	public void delete(ScheduledTaskDefinition task) {
-		ScheduledFuture<?> scheduledFuture = runningTasks.get(task.getId());
+		ScheduledFuture<?> scheduledFuture = scheduledTaskHolder.get(task.getId());
 		if (scheduledFuture != null) {
-			final Object bean = getBean(task.getBeanName());
-			final String method = task.getMethodName();
+			Object bean = getBean(task.getBeanName());
+			String method = task.getMethodName();
 			logger.info("停止定时任务 - {}.{}()", bean.getClass().getName(), method);
 			scheduledFuture.cancel(true);
-			runningTasks.remove(task.getId());
+			scheduledTaskHolder.remove(task.getId());
 		}
 	}
 

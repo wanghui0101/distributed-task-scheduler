@@ -21,8 +21,9 @@ import org.springframework.util.StringUtils;
  * 用于构造CuratorFramework对象的FactoryBean
  * 
  * @see org.springframework.beans.factory.FactoryBean<T>
+ * @see com.github.dts.core.support.curator.CuratorRetryPolicy
  * @author wh
- * @lastModfied 2016-6-15 10:10:31
+ * @since 0.0.1
  */
 public class CuratorFrameworkFactoryBean implements FactoryBean<CuratorFramework>, InitializingBean, DisposableBean {
 

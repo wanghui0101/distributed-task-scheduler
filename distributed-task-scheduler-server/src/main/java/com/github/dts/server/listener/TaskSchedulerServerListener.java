@@ -1,7 +1,11 @@
 package com.github.dts.server.listener;
 
-public interface TaskSchedulerServerListener extends Listenable {
-	
-	String getName();
+/**
+ * 任务调度服务监听器
+ * 
+ * @author wh
+ * @since 0.0.2
+ */
+public interface TaskSchedulerServerListener extends Listener, Nameable {
 
 }

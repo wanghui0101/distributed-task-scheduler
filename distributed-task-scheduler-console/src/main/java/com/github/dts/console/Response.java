@@ -4,7 +4,7 @@ package com.github.dts.console;
  * 响应体的通用封装类
  * 
  * @author Wh
- * @lastModified 2015-7-1 12:01:09
+ * @since 0.0.1
  */
 public class Response {
 	

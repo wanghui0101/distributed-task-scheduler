@@ -4,6 +4,12 @@ import java.util.List;
 
 import org.apache.curator.framework.CuratorFramework;
 
+/**
+ * 基于Curator操作Zookeeper的接口
+ * 
+ * @author wh
+ * @since 0.0.1
+ */
 public interface CuratorOperations {
 
 	<T> T execute(CuratorCallback<T> callback);
