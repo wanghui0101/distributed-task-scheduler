@@ -36,7 +36,7 @@ public class ConsoleServiceImpl implements ConsoleService, InitializingBean {
 	
 	private Converter<ScheduledTaskDefinition, byte[]> converter;
 	
-	private String leaderListenerPath;
+	private String listenerPath;
 	
 	private LockNodeResolver lockNodeResolver;
 
@@ -52,8 +52,8 @@ public class ConsoleServiceImpl implements ConsoleService, InitializingBean {
 		this.converter = converter;
 	}
 	
-	public void setLeaderListenerPath(String leaderListenerPath) {
-		this.leaderListenerPath = leaderListenerPath;
+	public void setListenerPath(String listenerPath) {
+		this.listenerPath = listenerPath;
 	}
 	
 	public void setLockNodeResolver(LockNodeResolver lockNodeResolver) {
@@ -68,10 +68,10 @@ public class ConsoleServiceImpl implements ConsoleService, InitializingBean {
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(curatorOperations);
 		Assert.notNull(scheduledTaskDefinitionsParentPath);
-		Assert.notNull(leaderListenerPath);
+		Assert.notNull(listenerPath);
 		
 		if (lockNodeResolver == null) {
-			lockNodeResolver = new DefaultLockNodeResolver(curatorOperations, leaderListenerPath);
+			lockNodeResolver = new DefaultLockNodeResolver(curatorOperations, listenerPath);
 		}
 		
 		curatorOperations.createPathIfAbsent(scheduledTaskDefinitionsParentPath);
@@ -157,7 +157,7 @@ public class ConsoleServiceImpl implements ConsoleService, InitializingBean {
 	}
 	
 	private List<LockNode> getOrdredLockNodes() {
-		List<String> locks = curatorOperations.getChildren(leaderListenerPath);
+		List<String> locks = curatorOperations.getChildren(listenerPath);
 		if (!CollectionUtils.isEmpty(locks)) {
 			List<LockNode> lockNodes = new ArrayList<LockNode>();
 			for (String lock : locks) {

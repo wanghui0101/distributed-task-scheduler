@@ -24,6 +24,22 @@ public class DefaultLockNodeResolver implements LockNodeResolver {
 		this.leaderListenerPath = leaderListenerPath;
 	}
 	
+	public void setCuratorOperations(CuratorOperations curatorOperations) {
+		this.curatorOperations = curatorOperations;
+	}
+	
+	public CuratorOperations getCuratorOperations() {
+		return curatorOperations;
+	}
+	
+	public void setLeaderListenerPath(String leaderListenerPath) {
+		this.leaderListenerPath = leaderListenerPath;
+	}
+
+	public String getLeaderListenerPath() {
+		return leaderListenerPath;
+	}
+
 	@Override
 	public boolean support(String lock) {
 		return lock.contains(LOCK_FLAG);

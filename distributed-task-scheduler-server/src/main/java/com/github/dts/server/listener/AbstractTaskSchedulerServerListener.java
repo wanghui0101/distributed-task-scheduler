@@ -9,6 +9,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
+import com.github.dts.server.ServerNameAware;
+
 /**
  * 选举的主要实现类
  * 
@@ -16,20 +18,31 @@ import org.springframework.util.Assert;
  * @since 0.0.2
  */
 public abstract class AbstractTaskSchedulerServerListener extends LeaderSelectorListenerAdapter 
-	implements Listener, InitializingBean, DisposableBean {
+	implements TaskSchedulerServerListener, ServerNameAware, InitializingBean, DisposableBean {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	
-	private String leaderListenerPath; // 监听器在ZooKeeper上的路径
+	private String listenerPath; // 监听器在ZooKeeper上的路径
 
 	private CuratorFramework client;
-
-	public void setLeaderListenerPath(String leaderListenerPath) {
-		this.leaderListenerPath = leaderListenerPath;
+	
+	private String serverName;
+	
+	public void setListenerPath(String listenerPath) {
+		this.listenerPath = listenerPath;
 	}
 
 	public void setClient(CuratorFramework client) {
 		this.client = client;
+	}
+	
+	@Override
+	public void setServerName(String serverName) {
+		this.serverName = serverName;
+	}
+	
+	public String getServerName() {
+		return serverName;
 	}
 
 	private LeaderSelector leaderSelector;
@@ -38,10 +51,10 @@ public abstract class AbstractTaskSchedulerServerListener extends LeaderSelector
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(client);
-		Assert.notNull(leaderListenerPath);
+		Assert.notNull(listenerPath);
 		
 		// 利用Curator封装的选举机制, 确保任意时刻有且仅有一个leader
-		leaderSelector = new LeaderSelector(client, leaderListenerPath, this); 
+		leaderSelector = new LeaderSelector(client, listenerPath, this); 
 		leaderSelector.autoRequeue(); // 使丢失leader的服务, 仍可重新加入到竞争leader的行列中
 		leaderSelector.start();
 	}

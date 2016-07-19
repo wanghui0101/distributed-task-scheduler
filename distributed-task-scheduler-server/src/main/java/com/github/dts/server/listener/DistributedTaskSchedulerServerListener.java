@@ -10,17 +10,17 @@ import org.apache.curator.framework.CuratorFramework;
  * @author wh
  * @since 0.0.2
  */
-public class DistributedTaskSchedulerServerListener extends NameableTaskSchedulerServerListener 
-	implements TaskSchedulerServerListener {
+public class DistributedTaskSchedulerServerListener extends AbstractTaskSchedulerServerListener {
 
 	/**
 	 * 方法最后加入了死循环, 使获得leader后一直占有leader角色, 除非发生连接丢失等异常
 	 */
 	@Override
 	protected void doTakeLeaderShip(CuratorFramework client) throws Exception {
-    	logger.info("{} 被选举为主节点", getName());
+    	logger.info("{} 被选举为主节点", getServerName());
     	while (true) {
             TimeUnit.HOURS.sleep(12);
         }
 	}
+
 }

@@ -8,6 +8,6 @@
 	<bean id="consoleService" class="com.github.dts.console.service.ConsoleServiceImpl"
 		p:curatorOperations-ref="curatorOperations"
 		p:scheduledTaskDefinitionsParentPath="${scheduled.task.definitions.parent.path}"
-		p:leaderListenerPath="${leader.listener.path}" />
+		p:listenerPath="${listener.path}" />
 	
 </beans>
