@@ -5,6 +5,12 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 
 import com.github.dts.core.util.NetUtils;
 
+/**
+ * 向所有实现了ServerNameAware接口的类注入serverName
+ * 
+ * @author wh
+ * @since 0.0.2
+ */
 public class ServerNameAwarePostProcessor implements BeanPostProcessor {
 	
 	private String serverName;
@@ -13,7 +19,7 @@ public class ServerNameAwarePostProcessor implements BeanPostProcessor {
 		this.serverName = serverName;
 	}
 	
-	public String getServerName() {
+	protected String getServerName() {
 		return serverName;
 	}
 

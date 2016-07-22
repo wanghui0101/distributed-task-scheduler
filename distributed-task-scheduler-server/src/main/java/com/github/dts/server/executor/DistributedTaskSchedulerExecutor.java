@@ -9,6 +9,7 @@ import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.util.MethodInvoker;
 
 import com.github.dts.core.ScheduledTaskDefinition;
+import com.github.dts.server.ServerNameAware;
 
 /**
  * 实现具体的任务调度功能
@@ -16,9 +17,17 @@ import com.github.dts.core.ScheduledTaskDefinition;
  * @author wh
  * @since 0.0.2
  */
-public class DistributedTaskSchedulerExecutor extends AbstractTaskSchedulerExecutor {
+public class DistributedTaskSchedulerExecutor extends AbstractTaskSchedulerExecutor implements 
+	ServerNameAware {
 	
-	protected final static Logger logger = LoggerFactory.getLogger(DistributedTaskSchedulerExecutor.class);
+	private static final Logger logger = LoggerFactory.getLogger(DistributedTaskSchedulerExecutor.class);
+	
+	private String serverName;
+	
+	@Override
+	public void setServerName(String serverName) {
+		this.serverName = serverName;
+	}
 	
 	@Override
 	public void schedule(ScheduledTaskDefinition task) {
@@ -66,13 +75,13 @@ public class DistributedTaskSchedulerExecutor extends AbstractTaskSchedulerExecu
 				if (isLeader()) { // 只有主节点才执行
 					if (logger.isDebugEnabled()) {
 						logger.debug("定时任务 {}.{}() 将在主节点 - {} 上执行", 
-								bean.getClass().getName(), method, getServerName());
+								bean.getClass().getName(), method, serverName);
 					}
 					methodInvoker.invoke();
 				} else {
 					if (logger.isDebugEnabled()) {
 						logger.debug("定时任务 {}.{}() 不会在从节点 - {} 上执行", 
-								bean.getClass().getName(), method, getServerName());
+								bean.getClass().getName(), method, serverName);
 					}
 				}
 			} catch (InvocationTargetException e) {

@@ -1,10 +1,10 @@
 package com.github.dts.server.listener;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.leader.LeaderSelector;
 import org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
@@ -20,13 +20,9 @@ import com.github.dts.server.ServerNameAware;
 public abstract class AbstractTaskSchedulerServerListener extends LeaderSelectorListenerAdapter 
 	implements TaskSchedulerServerListener, ServerNameAware, InitializingBean, DisposableBean {
 
-	protected final Logger logger = LoggerFactory.getLogger(getClass());
-	
 	private String listenerPath; // 监听器在ZooKeeper上的路径
 
 	private CuratorFramework client;
-	
-	private String serverName;
 	
 	public void setListenerPath(String listenerPath) {
 		this.listenerPath = listenerPath;
@@ -35,18 +31,9 @@ public abstract class AbstractTaskSchedulerServerListener extends LeaderSelector
 	public void setClient(CuratorFramework client) {
 		this.client = client;
 	}
-	
-	@Override
-	public void setServerName(String serverName) {
-		this.serverName = serverName;
-	}
-	
-	public String getServerName() {
-		return serverName;
-	}
 
 	private LeaderSelector leaderSelector;
-	private boolean leader = false;
+	private Boolean leader = false;
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -65,9 +52,12 @@ public abstract class AbstractTaskSchedulerServerListener extends LeaderSelector
 	 * @see org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter
 	 */
 	@Override
-	public void takeLeadership(CuratorFramework client) throws Exception {
+	public final void takeLeadership(CuratorFramework client) throws Exception {
 		leader = true; // 标记已成为主节点
 		doTakeLeaderShip(client); // 交给子类实现
+		while (leader) {
+			TimeUnit.SECONDS.sleep(12);
+		}
 	}
 	
 	protected abstract void doTakeLeaderShip(CuratorFramework client) throws Exception;

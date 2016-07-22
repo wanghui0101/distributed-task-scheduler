@@ -32,7 +32,7 @@ public abstract class AbstractScheduledTaskWatcher implements ScheduledTaskWatch
 	
 	private TaskSchedulerServer taskSchedulerServer;
 
-	private Converter<ScheduledTaskDefinition, byte[]> converter = new ScheduledTaskDefinitionConverter();
+	private Converter<byte[], ScheduledTaskDefinition> converter = new ScheduledTaskDefinitionConverter();
 	
 	private String scheduledTaskDefinitionsParentPath;
 	
@@ -58,11 +58,11 @@ public abstract class AbstractScheduledTaskWatcher implements ScheduledTaskWatch
 		return scheduledTaskDefinitionsParentPathCache;
 	}
 
-	protected Converter<ScheduledTaskDefinition, byte[]> getConverter() {
+	protected Converter<byte[], ScheduledTaskDefinition> getConverter() {
 		return converter;
 	}
 
-	public void setConverter(Converter<ScheduledTaskDefinition, byte[]> converter) {
+	public void setConverter(Converter<byte[], ScheduledTaskDefinition> converter) {
 		this.converter = converter;
 	}
 
@@ -82,13 +82,12 @@ public abstract class AbstractScheduledTaskWatcher implements ScheduledTaskWatch
 		curatorOperations.createPathIfAbsent(scheduledTaskDefinitionsParentPath);
 		scheduledTaskDefinitionsParentPathCache = new PathChildrenCache(curatorOperations.getClient(), 
 				scheduledTaskDefinitionsParentPath, true);
-		start();
 	}
 
 	@Override
-	public void start() throws Exception {
-		getScheduledTaskDefinitionsParentPathCache().start(getStartMode());
-		getScheduledTaskDefinitionsParentPathCache().getListenable().addListener(new PathChildrenCacheListener() {
+	public final void start() throws Exception {
+		scheduledTaskDefinitionsParentPathCache.start(getStartMode());
+		scheduledTaskDefinitionsParentPathCache.getListenable().addListener(new PathChildrenCacheListener() {
 			
 			@Override
 			public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {

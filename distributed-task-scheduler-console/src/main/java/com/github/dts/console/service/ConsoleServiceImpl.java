@@ -34,7 +34,7 @@ public class ConsoleServiceImpl implements ConsoleService, InitializingBean {
 	
 	private String scheduledTaskDefinitionsParentPath;
 	
-	private Converter<ScheduledTaskDefinition, byte[]> converter;
+	private Converter<byte[], ScheduledTaskDefinition> converter;
 	
 	private String listenerPath;
 	
@@ -48,7 +48,7 @@ public class ConsoleServiceImpl implements ConsoleService, InitializingBean {
 		this.scheduledTaskDefinitionsParentPath = scheduledTaskDefinitionsParentPath;
 	}
 	
-	public void setConverter(Converter<ScheduledTaskDefinition, byte[]> converter) {
+	public void setConverter(Converter<byte[], ScheduledTaskDefinition> converter) {
 		this.converter = converter;
 	}
 	
@@ -84,7 +84,7 @@ public class ConsoleServiceImpl implements ConsoleService, InitializingBean {
 		for (String scheduledTaskDefinitionPath : scheduledTaskDefinitionsPath) {
 			String scheduledTaskDefinitionAbsolutePath = scheduledTaskDefinitionsParentPath + "/" + scheduledTaskDefinitionPath;
 			byte[] scheduledTaskDefinitionData = curatorOperations.getData(scheduledTaskDefinitionAbsolutePath);
-			ScheduledTaskDefinition scheduledTaskDefinition = converter.to(scheduledTaskDefinitionData);
+			ScheduledTaskDefinition scheduledTaskDefinition = converter.from(scheduledTaskDefinitionData);
 			scheduledTaskDefinitions.add(scheduledTaskDefinition);
 		}
 		ComparatorUtils.sort(scheduledTaskDefinitions, ScheduledTaskDefinitionComparator.INSTANCE);
@@ -95,7 +95,7 @@ public class ConsoleServiceImpl implements ConsoleService, InitializingBean {
 	public ScheduledTaskDefinition findOne(String id) {
 		String path = scheduledTaskDefinitionsParentPath + "/" + id;
 		byte[] data = curatorOperations.getData(path);
-		return converter.to(data);
+		return converter.from(data);
 	}
 
 	@Override
@@ -103,7 +103,7 @@ public class ConsoleServiceImpl implements ConsoleService, InitializingBean {
 		task.setId(UUID.randomUUID().toString());
 		task.setLastModified(new Date());
 		task.setStatus(Status.STOPPED);
-		byte[] data = converter.from(task);
+		byte[] data = converter.to(task);
 		String path = scheduledTaskDefinitionsParentPath + "/" + task.getId();
 		curatorOperations.create(path, data);
 	}
@@ -138,7 +138,7 @@ public class ConsoleServiceImpl implements ConsoleService, InitializingBean {
 	}
 	
 	private void save(ScheduledTaskDefinition task) {
-		byte[] data = converter.from(task);
+		byte[] data = converter.to(task);
 		String path = scheduledTaskDefinitionsParentPath + "/" + task.getId();
 		curatorOperations.setData(path, data);
 	}
@@ -161,7 +161,7 @@ public class ConsoleServiceImpl implements ConsoleService, InitializingBean {
 		if (!CollectionUtils.isEmpty(locks)) {
 			List<LockNode> lockNodes = new ArrayList<LockNode>();
 			for (String lock : locks) {
-				if (lockNodeResolver.support(lock)) {
+				if (lockNodeResolver.supports(lock)) {
 					LockNode lockNode = lockNodeResolver.resolve(lock);
 					lockNodes.add(lockNode);
 				}

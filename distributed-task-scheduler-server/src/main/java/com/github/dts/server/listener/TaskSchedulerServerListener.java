@@ -1,6 +1,5 @@
 package com.github.dts.server.listener;
 
-
 /**
  * 任务调度服务监听器
  * 
@@ -10,4 +9,5 @@ package com.github.dts.server.listener;
 public interface TaskSchedulerServerListener {
 
 	boolean isLeader();
+
 }

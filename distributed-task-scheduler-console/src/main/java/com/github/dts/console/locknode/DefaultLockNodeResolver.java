@@ -9,11 +9,11 @@ import com.github.dts.core.support.curator.CuratorOperations;
  * 
  * @author wh
  * 
- * since 0.0.2
+ * @since 0.0.2
  */
 public class DefaultLockNodeResolver implements LockNodeResolver {
 	
-	private static final String LOCK_FLAG = "-lock-";
+	private static final String LOCK_FLAG = "lock-";
 
 	private CuratorOperations curatorOperations;
 	private String leaderListenerPath;
@@ -41,7 +41,7 @@ public class DefaultLockNodeResolver implements LockNodeResolver {
 	}
 
 	@Override
-	public boolean support(String lock) {
+	public boolean supports(String lock) {
 		return lock.contains(LOCK_FLAG);
 	}
 

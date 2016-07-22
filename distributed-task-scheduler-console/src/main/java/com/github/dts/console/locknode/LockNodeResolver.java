@@ -5,11 +5,11 @@ package com.github.dts.console.locknode;
  * 
  * @author wh
  * 
- * since 0.0.2
+ * @since 0.0.2
  */
 public interface LockNodeResolver {
 	
-	boolean support(String lock);
+	boolean supports(String lock);
 
 	LockNode resolve(String lock);
 }

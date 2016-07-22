@@ -26,24 +26,24 @@ public class DistributedScheduledTaskWatcher extends AbstractScheduledTaskWatche
 	@Override
 	protected void onPathChildrenCacheEvent(CuratorFramework client, PathChildrenCacheEvent event) 
 			throws Exception {
-		Converter<ScheduledTaskDefinition, byte[]> converter = getConverter();
+		Converter<byte[], ScheduledTaskDefinition> converter = getConverter();
 		PathChildrenCache scheduledTaskDefinitionsParentPathCache = getScheduledTaskDefinitionsParentPathCache();
 		TaskSchedulerServer taskSchedulerServer = getTaskSchedulerServer();
 		
 		switch (event.getType()) {
 			case CHILD_ADDED: {
 				logger.info("新增定时任务 - {}", event.getData().getPath());
-				ScheduledTaskDefinition task = converter.to(event.getData().getData());
+				ScheduledTaskDefinition task = converter.from(event.getData().getData());
 				taskSchedulerServer.add(task);
 			} break;
 			case CHILD_UPDATED: {
 				logger.info("修改定时任务 - {}", event.getData().getPath());
-				ScheduledTaskDefinition task = converter.to(event.getData().getData());
-				getTaskSchedulerServer().update(task);
+				ScheduledTaskDefinition task = converter.from(event.getData().getData());
+				taskSchedulerServer.update(task);
 			} break;
 			case CHILD_REMOVED: {
 				logger.info("删除定时任务 - {}", event.getData().getPath());
-				ScheduledTaskDefinition task = converter.to(event.getData().getData());
+				ScheduledTaskDefinition task = converter.from(event.getData().getData());
 				taskSchedulerServer.delete(task);
 			} break;
 			case CONNECTION_LOST:

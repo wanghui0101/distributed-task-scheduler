@@ -9,16 +9,16 @@ import com.github.dts.core.support.jackson.JsonMapper;
  * @author wh
  * @since 0.0.1
  */
-public class ScheduledTaskDefinitionConverter implements Converter<ScheduledTaskDefinition, byte[]> {
+public class ScheduledTaskDefinitionConverter implements Converter<byte[], ScheduledTaskDefinition> {
 
 	@Override
-	public byte[] from(ScheduledTaskDefinition source) {
-		return new JsonMapper().toJson(source).getBytes();
+	public ScheduledTaskDefinition from(byte[] target) {
+		return new JsonMapper().fromJson(new String(target), ScheduledTaskDefinition.class);
 	}
 
 	@Override
-	public ScheduledTaskDefinition to(byte[] target) {
-		return new JsonMapper().fromJson(new String(target), ScheduledTaskDefinition.class);
+	public byte[] to(ScheduledTaskDefinition scheduledTaskDefinition) {
+		return new JsonMapper().toJson(scheduledTaskDefinition).getBytes();
 	}
 
 }

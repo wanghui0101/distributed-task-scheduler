@@ -5,25 +5,22 @@ import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 
-import com.github.dts.server.ServerNameAware;
 import com.github.dts.server.listener.TaskSchedulerServerListener;
 
 /**
- * 
+ * 为子类准备好必要的工具类
  * 
  * @author wh
  * @since 0.0.2
  */
 public abstract class AbstractTaskSchedulerExecutor extends ApplicationObjectSupport 
-	implements TaskSchedulerExecutor, ServerNameAware, InitializingBean {
+	implements TaskSchedulerExecutor, InitializingBean {
 	
 	private TaskScheduler taskScheduler;
 	
 	private ScheduledTaskHolder scheduledTaskHolder;
 	
 	private TaskSchedulerServerListener taskSchedulerServerListener;
-	
-	private String serverName;
 	
 	public void setTaskScheduler(TaskScheduler taskScheduler) {
 		this.taskScheduler = taskScheduler;
@@ -55,9 +52,16 @@ public abstract class AbstractTaskSchedulerExecutor extends ApplicationObjectSup
 
 	public AbstractTaskSchedulerExecutor(TaskScheduler taskScheduler, TaskSchedulerServerListener 
 			taskSchedulerServerListener) {
-		setTaskScheduler(taskScheduler);
-		setTaskSchedulerServerListener(taskSchedulerServerListener);
-		setScheduledTaskHolder(new RunningScheduledTaskHolder());
+		this.taskScheduler =  taskScheduler;
+		this.taskSchedulerServerListener = taskSchedulerServerListener;
+		this.scheduledTaskHolder = new RunningScheduledTaskHolder();
+	}
+	
+	public AbstractTaskSchedulerExecutor(TaskScheduler taskScheduler, TaskSchedulerServerListener 
+			taskSchedulerServerListener, ScheduledTaskHolder scheduledTaskHolder) {
+		this.taskScheduler =  taskScheduler;
+		this.taskSchedulerServerListener = taskSchedulerServerListener;
+		this.scheduledTaskHolder = scheduledTaskHolder;
 	}
 	
 	@Override
@@ -66,21 +70,12 @@ public abstract class AbstractTaskSchedulerExecutor extends ApplicationObjectSup
 		Assert.notNull(taskSchedulerServerListener);
 		
 		if (scheduledTaskHolder == null) {
-			setScheduledTaskHolder(new RunningScheduledTaskHolder());
+			this.scheduledTaskHolder = new RunningScheduledTaskHolder();
 		}
 	}
 	
 	public boolean isLeader() { // 委托给taskSchedulerServerListener
 		return taskSchedulerServerListener.isLeader();
-	}
-	
-	@Override
-	public void setServerName(String serverName) {
-		this.serverName = serverName;
-	}
-
-	protected String getServerName() {
-		return serverName;
 	}
 	
 	protected final Object getBean(String beanName) {
