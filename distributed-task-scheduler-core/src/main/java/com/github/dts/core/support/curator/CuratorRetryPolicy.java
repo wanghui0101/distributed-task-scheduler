@@ -4,7 +4,7 @@ package com.github.dts.core.support.curator;
  * 对Curator重试策略的简单封装
  * 
  * @author wh
- * @lastModified 2016-6-15 10:12:20
+ * @since 0.0.1
  */
 public enum CuratorRetryPolicy {
 

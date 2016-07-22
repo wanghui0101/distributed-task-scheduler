@@ -9,7 +9,7 @@ import org.apache.zookeeper.data.Stat;
  * Curator模板，主要实现在CuratorOperations中定义的方法
  * 
  * @author wh
- * @lastModified 2016-6-14 23:02:12
+ * @since 0.0.1
  */
 public class CuratorTemplate extends CuratorSupport implements CuratorOperations {
 	

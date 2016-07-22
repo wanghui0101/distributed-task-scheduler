@@ -4,7 +4,7 @@ package com.github.dts.core.support.curator;
  * Curator支持类
  * 
  * @author wh
- * @lastModified 2016-4-18 11:39:48
+ * @since 0.0.1
  */
 public abstract class CuratorSupport {
 

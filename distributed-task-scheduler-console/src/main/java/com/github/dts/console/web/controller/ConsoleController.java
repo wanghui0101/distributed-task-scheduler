@@ -14,6 +14,12 @@ import com.github.dts.console.Response;
 import com.github.dts.console.service.ConsoleService;
 import com.github.dts.core.ScheduledTaskDefinition;
 
+/**
+ * 控制台Controller
+ * 
+ * @author wh
+ * @since 0.0.1
+ */
 @RequestMapping
 @Controller
 public class ConsoleController {
@@ -26,10 +32,10 @@ public class ConsoleController {
 		return "index";
 	}
 	
-	@RequestMapping(value = "/leader", method = RequestMethod.GET)
+	@RequestMapping(value = "/nodes", method = RequestMethod.GET)
 	@ResponseBody
-	public String leader() {
-		return consoleService.leader();
+	public String[] nodes() {
+		return consoleService.nodes();
 	}
 	
 	@RequestMapping(value = "/all", method = RequestMethod.POST)

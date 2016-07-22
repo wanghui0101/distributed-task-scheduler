@@ -59,8 +59,14 @@ $(function() {
 		});
 	});
 	
-	$.get($$ctx + "/leader", function(r) {
-		$("#leader").html("当前定时任务所在主节点服务器IP为：" + r);
+	$.get($$ctx + "/nodes", function(r) {
+		var html = "";
+		if (r) {
+			html = "当前定时任务所在主节点为：" + r[0] + "。所有节点为：" + r.join(", ");
+		} else {
+			html = "当前无运行的定时任务节点";
+		}
+		$("#nodes").html(html);
 	});
 	
 });

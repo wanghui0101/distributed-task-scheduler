@@ -5,12 +5,9 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 	
-	<bean id="converter" class="com.github.dts.core.converter.ScheduledTaskDefinitionConverter" />
-	
 	<bean id="consoleService" class="com.github.dts.console.service.ConsoleServiceImpl"
 		p:curatorOperations-ref="curatorOperations"
 		p:scheduledTaskDefinitionsParentPath="${scheduled.task.definitions.parent.path}"
-		p:converter-ref="converter"
-		p:leaderListenerPath="${leader.listener.path}" />
+		p:listenerPath="${listener.path}" />
 	
 </beans>

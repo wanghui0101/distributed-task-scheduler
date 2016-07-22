@@ -2,16 +2,18 @@ package com.github.dts.core;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * 定时任务定义. 实现Comparable接口用于排序
+ * 定时任务定义
  * 
  * @author wh
- * @lastModified 2016-6-15 10:08:00
+ * @since 0.0.1
  */
-public class ScheduledTaskDefinition implements Comparable<ScheduledTaskDefinition> {
+public class ScheduledTaskDefinition {
 
 	private String id;
 
@@ -97,10 +99,10 @@ public class ScheduledTaskDefinition implements Comparable<ScheduledTaskDefiniti
 	public String getName() {
 		return this.beanName + "." + this.methodName + "()";
 	}
-
+	
 	@Override
-	public int compareTo(ScheduledTaskDefinition that) {
-		return this.getName().compareTo(that.getName());
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
 	}
 
 }

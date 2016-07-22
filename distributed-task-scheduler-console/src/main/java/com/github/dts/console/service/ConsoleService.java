@@ -4,6 +4,12 @@ import java.util.List;
 
 import com.github.dts.core.ScheduledTaskDefinition;
 
+/**
+ * 控制台服务接口
+ * 
+ * @author wh
+ * @since 0.0.1
+ */
 public interface ConsoleService {
 	
 	/**
@@ -50,9 +56,9 @@ public interface ConsoleService {
 	void stop(String id);
 
 	/**
-	 * 获取定时任务服务的主节点IP
+	 * 获取定时任务服务所有节点，主节点在第1个
 	 * @return
 	 */
-	String leader();
+	String[] nodes();
 	
 }

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
  * 参考org.springside.modules.mapper.JsonMapper
  * 
  * @author wh
+ * @since 0.0.1
  */
 public class JsonMapper {
 

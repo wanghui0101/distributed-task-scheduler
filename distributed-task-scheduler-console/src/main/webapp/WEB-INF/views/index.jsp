@@ -10,7 +10,7 @@
 		<div>
 			<button type="button" id="add">新增</button>
 		</div>
-		<div id="leader"></div>
+		<div id="nodes"></div>
 	</body>
 	<script type="text/javascript" src="${ctx}/static/app/js/console-index.js"></script>
 </html>

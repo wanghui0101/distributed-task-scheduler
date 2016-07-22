@@ -1,3 +1,4 @@
-body {
+body, table, button {
 	font-family: "Microsoft YaHei";
+	font-size: 13px;
 }

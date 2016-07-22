@@ -4,7 +4,7 @@ package com.github.dts.core.support.curator;
  * Curator运行时异常
  * 
  * @author wh
- * @lastModified 2016-4-18 11:38:43
+ * @since 0.0.1
  */
 @SuppressWarnings("serial")
 public class CuratorException extends RuntimeException {
