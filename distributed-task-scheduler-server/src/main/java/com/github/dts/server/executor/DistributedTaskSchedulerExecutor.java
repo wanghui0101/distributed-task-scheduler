@@ -3,6 +3,7 @@ package com.github.dts.server.executor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ScheduledFuture;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.support.CronTrigger;
@@ -47,11 +48,11 @@ public class DistributedTaskSchedulerExecutor extends AbstractTaskSchedulerExecu
 			methodInvoker.setTargetMethod(method);
 			methodInvoker.prepare();
 		} catch (ClassNotFoundException e) {
-			logger.error("创建定时任务 - {}.{}() 时, 发生异常 - {}", bean.getClass().getName(), 
-					method, e.getMessage());
+			logger.error("创建定时任务 - {}.{}() 时, 发生异常 \n{}", bean.getClass().getName(), 
+					method, ExceptionUtils.getStackTrace(e));
 		} catch (NoSuchMethodException e) {
-			logger.error("创建定时任务 - {}.{}() 时, 发生异常 - {}", bean.getClass().getName(), 
-					method, e.getMessage());
+			logger.error("创建定时任务 - {}.{}() 时, 发生异常 \n{}", bean.getClass().getName(), 
+					method, ExceptionUtils.getStackTrace(e));
 		}
 		
 		return new RunnableTask(methodInvoker, bean, method);
@@ -85,11 +86,11 @@ public class DistributedTaskSchedulerExecutor extends AbstractTaskSchedulerExecu
 					}
 				}
 			} catch (InvocationTargetException e) {
-				logger.error("运行定时任务 - {}.{}() 时, 发生异常 - {}", bean.getClass().getName(), 
-						method, e.getMessage());
+				logger.error("运行定时任务 - {}.{}() 时, 发生异常 \n{}", bean.getClass().getName(), 
+						method, ExceptionUtils.getStackTrace(e));
 			} catch (IllegalAccessException e) {
-				logger.error("运行定时任务 - {}.{}() 时, 发生异常 - {}", bean.getClass().getName(), 
-						method, e.getMessage());
+				logger.error("运行定时任务 - {}.{}() 时, 发生异常 \n{}", bean.getClass().getName(), 
+						method, ExceptionUtils.getStackTrace(e));
 			}
 		}
 		
